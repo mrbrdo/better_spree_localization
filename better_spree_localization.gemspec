@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.platform    = Gem::Platform::RUBY
   s.name        = 'better_spree_localization'
   s.version     = BetterSpreeLocalization::VERSION
-  s.summary     = 'Adds DPD as a Shipping Method to Spree Commerce'
+  s.summary     = 'Better localization for Spree'
   s.description = s.summary
   s.required_ruby_version = '>= 2.7.0'
 
@@ -25,7 +25,6 @@ Gem::Specification.new do |s|
   s.add_dependency 'spree_core', '>= 3.1.0', '< 5.0'
   s.add_dependency 'spree_auth_devise', '>= 3.1.0', '< 5.0'
   s.add_dependency 'spree_extension'
-  s.add_dependency 'faraday'
 
   s.add_development_dependency 'capybara'
   s.add_development_dependency 'capybara-screenshot'
