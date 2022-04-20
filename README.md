@@ -4,7 +4,7 @@
 
 1. Add this extension to your Gemfile with this line:
         
-        gem 'gem_name', github: 'mrbrdo/gem_name'
+        gem 'better_spree_localization', github: 'mrbrdo/better_spree_localization'
 
 2. Install the gem using Bundler:
 

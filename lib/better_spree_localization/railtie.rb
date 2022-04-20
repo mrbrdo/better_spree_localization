@@ -1,6 +1,6 @@
-module GemName
+module BetterSpreeLocalization
   class Railtie < Rails::Railtie
-    initializer "gem_name.init" do |app|
+    initializer "better_spree_localization.init" do |app|
 
     end
     

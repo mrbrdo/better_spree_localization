@@ -2,12 +2,12 @@
 lib = File.expand_path('../lib/', __FILE__)
 $:.unshift lib unless $:.include?(lib)
 
-require 'gem_name/version'
+require 'better_spree_localization/version'
 
 Gem::Specification.new do |s|
   s.platform    = Gem::Platform::RUBY
-  s.name        = 'gem_name'
-  s.version     = GemName::VERSION
+  s.name        = 'better_spree_localization'
+  s.version     = BetterSpreeLocalization::VERSION
   s.summary     = 'Adds DPD as a Shipping Method to Spree Commerce'
   s.description = s.summary
   s.required_ruby_version = '>= 2.7.0'
