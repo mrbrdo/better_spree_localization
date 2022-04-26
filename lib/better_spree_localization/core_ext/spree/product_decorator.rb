@@ -4,11 +4,11 @@ module BetterSpreeLocalization
       module ProductDecorator
         module ClassMethods
           def search_by_name_or_sku(query)
-            helper = SpreeMobility::TranslationQuery.new(all.model.mobility_backend_class(:name))
-
-            helper.add_joins(self.all).
-            joins(:variants_including_master).
-            where("(LOWER(#{helper.col_name(:name)}) LIKE LOWER(:query)) OR (LOWER(#{::Spree::Variant.table_name}.sku) LIKE LOWER(:query))", query: "%#{query}%").distinct
+            all.joins(:variants_including_master).like_any([:name], [query]) { |conditions|
+              conditions + [
+                sanitize_sql_array(["LOWER(#{::Spree::Variant.table_name}.sku) LIKE ?", "%#{query&.downcase}%"])
+              ]
+            }.distinct
           end
         end
 
