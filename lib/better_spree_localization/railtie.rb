@@ -3,10 +3,10 @@ module BetterSpreeLocalization
     initializer "better_spree_localization.init" do |app|
       Dir[File.join(__dir__, 'core_ext', '**', '*.rb')].each { |f| require f }
     end
-    
+
     config.after_initialize do
       Rails.application.reload_routes!
-      
+
       [Rails.application, ::Spree::Core::Engine].each do |target|
         target_methods =
           target.routes.url_helpers.instance_methods.select do |meth|
@@ -16,7 +16,7 @@ module BetterSpreeLocalization
               !meth_s.start_with?('admin_') && !meth_s.include?('_admin_') && meth_s != 'spree_path' &&
               !meth_s.start_with?('rails_')
           end
-          
+
         patch_module = Module.new do
           target_methods.each do |meth|
             define_method meth do |*args, &block|
@@ -25,7 +25,7 @@ module BetterSpreeLocalization
               super(*args, &block)
             end
           end
-          
+
           if target == Rails.application
             define_method :rails_storage_redirect_url do |*args, &block|
                 if args.last.kind_of?(Hash)
@@ -41,43 +41,44 @@ module BetterSpreeLocalization
             end
           end
         end
-        
+
         target.routes.url_helpers.singleton_class.send :prepend, patch_module
       end
     end
-    
+
     config.to_prepare do
       # Extend reloadable classes
       ::Spree::Product.singleton_class.prepend BetterSpreeLocalization::CoreExt::Spree::ProductDecorator::ClassMethods
       ::Spree::Product.prepend BetterSpreeLocalization::CoreExt::Spree::ProductDecorator
       ::Spree::Core::Search::Base.prepend BetterSpreeLocalization::CoreExt::Spree::Core::Search::BaseDecorator
-      
+      ::Spree::Products::Find.prepend BetterSpreeLocalization::CoreExt::Spree::Products::FindDecorator
+
       Dir.glob(File.join(__dir__, 'overrides', '**', '*.rb')) do |c|
         Rails.configuration.cache_classes ? require(c) : load(c)
       end
-  
+
       # This will add before_action :set_locale (from locale param)
       class ::DeviseController
         include ::Spree::Core::ControllerHelpers::Locale
       end
-      
+
       class ::Spree::UserMailer
         def reset_password_instructions(user, token, *_args)
           current_store_id = _args.inject(:merge)[:current_store_id]
           @current_store = ::Spree::Store.find(current_store_id) || ::Spree::Store.current
-          
+
           # This would override our set_locale
           # @locale = @current_store.has_attribute?(:default_locale) ? @current_store.default_locale : I18n.default_locale
           # I18n.locale = @locale if @locale.present?
           @locale = ::I18n.locale
-          
+
           @edit_password_reset_url = spree.edit_spree_user_password_url(reset_password_token: token, host: @current_store.url)
           @user = user
 
           mail to: user.email, from: from_address, subject: @current_store.name + ' ' + ::I18n.t(:subject, scope: [:devise, :mailer, :reset_password_instructions]), store_url: @current_store.url
         end
       end
-      
+
       # Because we already patched _path helpers, spree_localized_link doesn't need to add locale
       module ::Spree
         module NavigationHelper
@@ -103,7 +104,7 @@ module BetterSpreeLocalization
           end
         end
       end
-      
+
       ::Spree::BaseHelper.class_eval do
         def seo_url(taxon, options = {})
           if taxon && taxon.permalink
@@ -117,7 +118,7 @@ module BetterSpreeLocalization
           end
         end
       end
-      
+
       module SeoUrlLocaleFixer
         def generate_new_path(url:, locale:, default_locale_supplied:)
           unless supported_path?(url.path)
@@ -129,11 +130,11 @@ module BetterSpreeLocalization
               locale_added_to_path: false
             )
           end
-          
+
           new_path = nil
           if rails_path = recognize_path(url)
             current_store = find_current_store(url)
-            
+
             if rails_path[:controller] == 'spree/products' && rails_path[:id].present?
               if new_id = model_attr_translation(locale, current_store.products, :slug, rails_path[:id])
                 new_path =
@@ -146,7 +147,7 @@ module BetterSpreeLocalization
               end
             end
           end
-          
+
           # default Spree logic
           unless new_path
             new_path =
@@ -166,7 +167,7 @@ module BetterSpreeLocalization
             locale_added_to_path: true
           )
         end
-        
+
         def initialize_url_object(url:, locale:, default_locale:)
           # Always append si-SL to / url on non-.si domain, even if it's the default
           # locale (because .eu always redirects / to /en/)
@@ -206,14 +207,14 @@ module BetterSpreeLocalization
         end
       end
       ::Spree::BuildLocalizedRedirectUrl.send :prepend, SeoUrlLocaleFixer
-      
+
       module UserSessionsControllerUseLocale
         def after_sign_in_redirect(resource_or_scope)
           stored_location_for(resource_or_scope) || account_path(locale: ::I18n.locale)
         end
       end
       ::Spree::UserSessionsController.send :prepend, UserSessionsControllerUseLocale
-      
+
       module FixSpreeBaseMailerLocale
         private
         def set_email_locale
@@ -224,14 +225,14 @@ module BetterSpreeLocalization
         end
       end
       ::Spree::BaseMailer.send :prepend, FixSpreeBaseMailerLocale
-      
+
       module ::Spree::MailHelper
         def link_to_page(page_code, *params)
           page = current_store.cms_pages.find_by(code: page_code, locale: ::I18n.locale)
           link_to page.title, spree.page_url(page.slug, locale: ::I18n.locale), *params
         end
       end
-      
+
       # add option to pass params, so we can pass locale
       module ::Spree::AuthenticationHelpers
         def spree_login_path(*params, &block)
@@ -245,7 +246,7 @@ module BetterSpreeLocalization
         def spree_logout_path(*params, &block)
           spree.logout_path(*spree_auth_path_params(params), &block)
         end
-        
+
         def spree_auth_path_params(params)
           default = { locale: ::I18n.locale }
           if params.present?
@@ -255,14 +256,14 @@ module BetterSpreeLocalization
           end
         end
       end
-      
+
       # add locale to redirects in signin
       module DeviseFixRedirects
         private
         def after_sign_in_redirect(resource_or_scope)
           stored_location_for(resource_or_scope) || account_path(locale: ::I18n.locale)
         end
-        
+
         def after_sign_out_redirect(resource_or_scope)
           super
           spree.login_path(locale: ::I18n.locale)
