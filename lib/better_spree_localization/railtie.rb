@@ -50,6 +50,7 @@ module BetterSpreeLocalization
       # Extend reloadable classes
       ::Spree::Product.singleton_class.prepend BetterSpreeLocalization::CoreExt::Spree::ProductDecorator::ClassMethods
       ::Spree::Product.prepend BetterSpreeLocalization::CoreExt::Spree::ProductDecorator
+      ::Spree::Core::Search::Base.prepend BetterSpreeLocalization::CoreExt::Spree::Core::Search::BaseDecorator
       
       Dir.glob(File.join(__dir__, 'overrides', '**', '*.rb')) do |c|
         Rails.configuration.cache_classes ? require(c) : load(c)
