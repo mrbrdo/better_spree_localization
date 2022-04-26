@@ -7,6 +7,7 @@ This gem provides some improvements over default Spree localization:
 * will keep locale with Devise URLs (login, logout etc) and reset password
 * will use correct locale in emails as was saved with the Order
 * it works with `spree_mobilize` gem instead of `spree_globalize`, because it provides more complete features
+* admin product search will now find products matching name or SKU
 
 ## Installation
 

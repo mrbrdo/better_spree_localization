@@ -1,7 +1,7 @@
 module BetterSpreeLocalization
   class Railtie < Rails::Railtie
     initializer "better_spree_localization.init" do |app|
-
+      Dir[File.join(__dir__, 'core_ext', '**', '*.rb')].each { |f| require f }
     end
     
     config.after_initialize do
@@ -47,6 +47,14 @@ module BetterSpreeLocalization
     end
     
     config.to_prepare do
+      # Extend reloadable classes
+      ::Spree::Product.singleton_class.prepend BetterSpreeLocalization::CoreExt::Spree::ProductDecorator::ClassMethods
+      ::Spree::Product.prepend BetterSpreeLocalization::CoreExt::Spree::ProductDecorator
+      
+      Dir.glob(File.join(__dir__, 'overrides', '**', '*.rb')) do |c|
+        Rails.configuration.cache_classes ? require(c) : load(c)
+      end
+  
       # This will add before_action :set_locale (from locale param)
       class ::DeviseController
         include ::Spree::Core::ControllerHelpers::Locale
