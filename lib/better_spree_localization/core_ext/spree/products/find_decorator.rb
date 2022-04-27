@@ -19,6 +19,9 @@ module BetterSpreeLocalization
           end
 
           def ordered_default(products)
+            # Not the nicest way to check if join with _search_order is there,
+            # but it works. Probably a little slow but nothing noticable.
+            return products unless products.to_sql.include?('_search_order')
             products.
             select("#{::Spree::Product.table_name}.*, _search_order").
             order('_search_order')
