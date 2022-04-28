@@ -50,6 +50,7 @@ module BetterSpreeLocalization
       # Extend reloadable classes
       ::Spree::Product.singleton_class.prepend BetterSpreeLocalization::CoreExt::Spree::ProductDecorator::ClassMethods
       ::Spree::Product.prepend BetterSpreeLocalization::CoreExt::Spree::ProductDecorator
+      ::Spree::Order.prepend BetterSpreeLocalization::CoreExt::Spree::OrderDecorator
       ::Spree::Core::Search::Base.prepend BetterSpreeLocalization::CoreExt::Spree::Core::Search::BaseDecorator
       ::Spree::Products::Find.prepend BetterSpreeLocalization::CoreExt::Spree::Products::FindDecorator
 
