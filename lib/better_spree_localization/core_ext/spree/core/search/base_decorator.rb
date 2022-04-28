@@ -24,6 +24,7 @@ module BetterSpreeLocalization
                     where(::Spree::Variant.arel_table[:sku].
                       lower.eq(query&.downcase)),
                   base_scope.like_any([:name], [query]),
+                  base_scope.like_any([:meta_keywords], [query]),
                   base_scope.like_any([:description], [query])
                 ]
 
