@@ -90,7 +90,7 @@ module BetterSpreeLocalization
                               "/#{::I18n.locale}"
                             end
 
-            if ::Spree::MenuItem::DYNAMIC_RESOURCE_TYPE.include? item.linked_resource_type
+            if ['Spree::Product', 'Spree::Taxon', 'Spree::CmsPage'].include?(item.linked_resource_type)
               # changed here:
               if output_locale && item.link.start_with?(output_locale)
                 item.link
