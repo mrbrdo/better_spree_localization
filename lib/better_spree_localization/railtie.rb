@@ -32,6 +32,8 @@ module BetterSpreeLocalization
         end
       end
 
+      # Without this fix, on non-default language, the confirmation
+      # email is sent in default language
       module FixSpreeBaseMailerLocale
         private
         def set_email_locale
@@ -123,6 +125,8 @@ module BetterSpreeLocalization
       end
     
       module SeoUrlLocaleFixer
+        # This translates slugs/permalinks for product and taxon URLs when
+        # switching locale
         def generate_new_path(url:, locale:, default_locale_supplied:)
           unless supported_path?(url.path)
             return success(
@@ -134,6 +138,7 @@ module BetterSpreeLocalization
             )
           end
     
+          # new logic
           new_path = nil
           if rails_path = recognize_path(url)
             current_store = find_current_store(url)
@@ -188,6 +193,7 @@ module BetterSpreeLocalization
     
         protected
     
+        # New helper methods for URL slug translation
         def model_attr_translation(new_locale, base_scope, attr, value)
           record = base_scope.find_by(attr => value)
           Mobility.with_locale(new_locale) { record.send(attr) } if record
