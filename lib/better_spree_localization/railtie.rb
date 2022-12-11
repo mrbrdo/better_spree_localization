@@ -54,13 +54,6 @@ module BetterSpreeLocalization
         end
       end
 
-      module UserSessionsControllerUseLocale
-        def after_sign_in_redirect(resource_or_scope)
-          stored_location_for(resource_or_scope) || account_path(locale: ::I18n.locale)
-        end
-      end
-      ::Spree::UserSessionsController.send :prepend, UserSessionsControllerUseLocale
-
       module FixSpreeBaseMailerLocale
         private
         def set_email_locale
@@ -79,44 +72,6 @@ module BetterSpreeLocalization
           link_to page.title, spree.page_url(page.slug, locale: ::I18n.locale), *params
         end
       end
-
-      # add option to pass params, so we can pass locale
-      module ::Spree::AuthenticationHelpers
-        def spree_login_path(*params, &block)
-          spree.login_path(*spree_auth_path_params(params), &block)
-        end
-
-        def spree_signup_path(*params, &block)
-          spree.signup_path(*spree_auth_path_params(params), &block)
-        end
-
-        def spree_logout_path(*params, &block)
-          spree.logout_path(*spree_auth_path_params(params), &block)
-        end
-
-        def spree_auth_path_params(params)
-          default = { locale: ::I18n.locale }
-          if params.present?
-            [default.merge(params.first), *params[1,100]]
-          else
-            [default]
-          end
-        end
-      end
-
-      # add locale to redirects in signin
-      module DeviseFixRedirects
-        private
-        def after_sign_in_redirect(resource_or_scope)
-          stored_location_for(resource_or_scope) || account_path(locale: ::I18n.locale)
-        end
-
-        def after_sign_out_redirect(resource_or_scope)
-          super
-          spree.login_path(locale: ::I18n.locale)
-        end
-      end
-      ::Spree::UserSessionsController.send :prepend, DeviseFixRedirects
     end
 
     # URL locale patches
