@@ -39,6 +39,10 @@ module BetterSpreeLocalization
           if taxon && taxon.permalink
             spree.nested_taxons_path(taxon.permalink, options.merge(locale: locale_param))
           elsif taxon
+            # Because of translations (e.g. with mobility gem), but also without that
+            # in some cases, it could happen that the permalink is blank. In that case,
+            # we can use an ID instead, because TaxonsController uses Taxon.friendly.find,
+            # which will also work with IDs.
             Rollbar.error('seo_url for taxon without permalink', taxon: taxon)
             spree.nested_taxons_path(taxon.id, options.merge(locale: locale_param))
           else
