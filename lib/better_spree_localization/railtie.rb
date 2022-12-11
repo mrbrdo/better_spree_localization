@@ -1,4 +1,20 @@
 module BetterSpreeLocalization
+  def self.log_url_patch(meth, args)
+    write_mode = 'a'
+    filename = Rails.root.join('log', 'url_patch.txt')
+    return if File.exist?(filename) && File.size(filename) > 30 * 1000 * 1000
+    open(filename, write_mode) do |f|
+      args_str = args.map { |arg|
+        arg.to_s.gsub(/\R+/, ' ')
+      }.join(', ')
+      f.puts "--- #{meth}(#{args_str})"
+      caller.each do |line|
+        f.puts "    #{line}" if line.to_s.include?('spree')
+      end
+      f.puts " "
+    end
+  end
+
   class Railtie < Rails::Railtie
     initializer "better_spree_localization.init" do |app|
       Dir[File.join(__dir__, 'core_ext', '**', '*.rb')].each { |f| require f }
@@ -72,6 +88,9 @@ module BetterSpreeLocalization
           target_methods.each do |meth|
             define_method meth do |*args, &block|
               args.push({}) if !args.last.kind_of?(Hash)
+              if !args.last.key?(:locale)
+                BetterSpreeLocalization.log_url_patch(meth, args)
+              end
               args.last[:locale] ||= ::I18n.locale
               super(*args, &block)
             end
