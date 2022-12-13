@@ -3,13 +3,23 @@ module BetterSpreeLocalization
     write_mode = 'a'
     filename = Rails.root.join('log', 'url_patch.txt')
     return if File.exist?(filename) && File.size(filename) > 30 * 1000 * 1000
+    filtered_backtrace = []
+    caller.each do |line|
+      line = line.to_s
+      if line.include?('spree')
+        filtered_backtrace << line
+        # don't log spree_backend url helpers
+        return if line.include?('gems/spree_backend')
+      end
+    end
+    
     open(filename, write_mode) do |f|
       args_str = args.map { |arg|
         arg.to_s.gsub(/\R+/, ' ')
       }.join(', ')
       f.puts "--- #{meth}(#{args_str})"
-      caller.each do |line|
-        f.puts "    #{line}" if line.to_s.include?('spree')
+      filtered_backtrace.each do |line|
+        f.puts "    #{line}"
       end
       f.puts " "
     end
