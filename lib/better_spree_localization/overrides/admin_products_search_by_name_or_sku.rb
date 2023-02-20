@@ -1,5 +1,5 @@
 Deface::Override.new(
-  virtual_path:  'spree/admin/products/index',
+  virtual_path:  'spree/admin/products/_filters',
   name:          'admin_products_search_by_name_or_sku',
   replace: 'div[data-hook=admin_products_index_search] > div:first-child',
   text: <<-HTML
