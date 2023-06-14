@@ -4,11 +4,12 @@ module BetterSpreeLocalization
       module ProductDecorator
         module ClassMethods
           def search_by_name_or_sku(query)
-            all.joins(:variants_including_master).like_any([:name], [query]) { |conditions|
-              conditions + [
-                sanitize_sql_array(["LOWER(#{::Spree::Variant.table_name}.sku) LIKE ?", "%#{query&.downcase}%"])
-              ]
-            }.distinct
+            all.where(id:
+              all.joins(:variants_including_master).like_any([:name], [query]) { |conditions|
+                conditions + [
+                  sanitize_sql_array(["LOWER(#{::Spree::Variant.table_name}.sku) LIKE ?", "%#{query&.downcase}%"])
+                ]
+              }.select(:id))
           end
         end
 
