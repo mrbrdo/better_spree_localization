@@ -160,7 +160,7 @@ module BetterSpreeLocalization
       module SeoUrlLocaleFixer
         # This translates slugs/permalinks for product and taxon URLs when
         # switching locale
-        def generate_new_path(url:, locale:, default_locale_supplied:)
+        def generate_new_path(url:, locale:, default_locale:, default_locale_supplied:)
           unless supported_path?(url.path)
             return success(
               url: url,
@@ -191,19 +191,13 @@ module BetterSpreeLocalization
     
           # default Spree logic
           unless new_path
-            new_path =
-              if default_locale_supplied
-                maches_locale_regex?(url.path) ? url.path.gsub(::Spree::BuildLocalizedRedirectUrl::LOCALE_REGEX, '/') : url.path
-              else
-                maches_locale_regex?(url.path) ? url.path.gsub(::Spree::BuildLocalizedRedirectUrl::LOCALE_REGEX, "/#{locale}/") : "/#{locale}#{url.path}"
-              end
-            new_path = cleanup_path(new_path)
+            new_path = generate_regular_page_path(default_locale_supplied, url, locale)
           end
     
           success(
             url: url,
             locale: locale,
-            path: new_path,
+            path: cleanup_path(new_path),
             default_locale_supplied: default_locale_supplied,
             locale_added_to_path: true
           )
@@ -217,9 +211,10 @@ module BetterSpreeLocalization
             super
           else
             success(
-              url: uri,
+              url: URI(url),
               locale: locale,
-              default_locale_supplied: false
+              default_locale: default_locale,
+              default_locale_supplied: default_locale_supplied?(locale, default_locale)
             )
           end
         end
