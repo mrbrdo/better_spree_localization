@@ -70,6 +70,8 @@ module BetterSpreeLocalization
           # ActiveJob already forwards locale, but set it to order locale if we have it anyway
           if @order&.locale.present?
             ::I18n.locale = @order.locale
+          else
+            super
           end
         end
       end
