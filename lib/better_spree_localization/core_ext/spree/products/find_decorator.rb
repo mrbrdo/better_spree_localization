@@ -13,6 +13,11 @@ module BetterSpreeLocalization
               else
                 ordered_default(products)
               end
+            elsif sort_by == 'newest-first'
+              # Default order is by available_on, but this is many times
+              # NULL, so it's better to order by created_at
+              # (also, cannot use COALESCE here due to SELECT DISTINCT)
+              super.reorder(created_at: :desc)
             else
               super
             end
